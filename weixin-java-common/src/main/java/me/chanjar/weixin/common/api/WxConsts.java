@@ -55,15 +55,15 @@ public class WxConsts {
   ///////////////////////
   public static final String MASS_ST_SUCCESS = "send success";
   public static final String MASS_ST_FAIL = "send fail";
-  public static final String MASS_ST_涉嫌广告 = "err(10001)";
-  public static final String MASS_ST_涉嫌政治 = "err(20001)";
-  public static final String MASS_ST_涉嫌社会 = "err(20004)";
-  public static final String MASS_ST_涉嫌色情 = "err(20002)";
-  public static final String MASS_ST_涉嫌违法犯罪 = "err(20006)";
-  public static final String MASS_ST_涉嫌欺诈 = "err(20008)";
-  public static final String MASS_ST_涉嫌版权 = "err(20013)";
-  public static final String MASS_ST_涉嫌互推_互相宣传 = "err(22000)";
-  public static final String MASS_ST_涉嫌其他 = "err(21000)";
+  public static final String MASS_ST_10001 = "err(10001)";
+  public static final String MASS_ST_20001 = "err(20001)";
+  public static final String MASS_ST_20004 = "err(20004)";
+  public static final String MASS_ST_20002 = "err(20002)";
+  public static final String MASS_ST_20006 = "err(20006)";
+  public static final String MASS_ST_20008 = "err(20008)";
+  public static final String MASS_ST_20013 = "err(20013)";
+  public static final String MASS_ST_22000 = "err(22000)";
+  public static final String MASS_ST_21000 = "err(21000)";
 
   /**
    * 群发反馈消息代码所对应的文字描述
@@ -136,19 +136,23 @@ public class WxConsts {
   public static final String MEDIA_VIDEO = "video";
   public static final String MEDIA_THUMB = "thumb";
   public static final String MEDIA_FILE = "file";
-  /**
-   * 点击推事件
-   */
-  public static final String BUTTON_CLICK = "click";
 
 
   ///////////////////////
   // 自定义菜单的按钮类型
   ///////////////////////
   /**
+   * 点击推事件
+   */
+  public static final String BUTTON_CLICK = "click";
+  /**
    * 跳转URL
    */
   public static final String BUTTON_VIEW = "view";
+  /**
+   * 跳转到小程序
+   */
+  public static final String BUTTON_MINIPROGRAM = "miniprogram";
   /**
    * 扫码推事件
    */
@@ -181,6 +185,7 @@ public class WxConsts {
    * 跳转图文消息URL
    */
   public static final String BUTTON_VIEW_LIMITED = "view_limited";
+  
   /**
    * 不弹出授权页面，直接跳转，只能获取用户openid
    */
@@ -210,14 +215,14 @@ public class WxConsts {
   static {
     MASS_ST_2_DESC.put(MASS_ST_SUCCESS, "发送成功");
     MASS_ST_2_DESC.put(MASS_ST_FAIL, "发送失败");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌广告, "涉嫌广告");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌政治, "涉嫌政治");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌社会, "涉嫌社会");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌色情, "涉嫌色情");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌违法犯罪, "涉嫌违法犯罪");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌欺诈, "涉嫌欺诈");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌版权, "涉嫌版权");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌互推_互相宣传, "涉嫌互推_互相宣传");
-    MASS_ST_2_DESC.put(MASS_ST_涉嫌其他, "涉嫌其他");
+    MASS_ST_2_DESC.put(MASS_ST_10001, "涉嫌广告");
+    MASS_ST_2_DESC.put(MASS_ST_20001, "涉嫌政治");
+    MASS_ST_2_DESC.put(MASS_ST_20004, "涉嫌社会");
+    MASS_ST_2_DESC.put(MASS_ST_20002, "涉嫌色情");
+    MASS_ST_2_DESC.put(MASS_ST_20006, "涉嫌违法犯罪");
+    MASS_ST_2_DESC.put(MASS_ST_20008, "涉嫌欺诈");
+    MASS_ST_2_DESC.put(MASS_ST_20013, "涉嫌版权");
+    MASS_ST_2_DESC.put(MASS_ST_22000, "涉嫌互推_互相宣传");
+    MASS_ST_2_DESC.put(MASS_ST_21000, "涉嫌其他");
   }
 }
