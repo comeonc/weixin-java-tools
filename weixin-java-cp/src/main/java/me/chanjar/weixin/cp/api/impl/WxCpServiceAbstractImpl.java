@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-public abstract class AbstractWxCpServiceImpl<H, P> implements WxCpService, RequestHttp<H, P> {
+public abstract class WxCpServiceAbstractImpl<H, P> implements WxCpService, RequestHttp<H, P> {
   protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
   private WxCpUserService userService = new WxCpUserServiceImpl(this);
@@ -131,6 +131,10 @@ public abstract class AbstractWxCpServiceImpl<H, P> implements WxCpService, Requ
   @Override
   public WxCpMessageSendResult messageSend(WxCpMessage message) throws WxErrorException {
     String url = "https://qyapi.weixin.qq.com/cgi-bin/message/send";
+    Integer agentId = message.getAgentId();
+    if(null == agentId){
+      message.setAgentId(this.getWxCpConfigStorage().getAgentId());
+    }
     return WxCpMessageSendResult.fromJson(this.post(url, message.toJson()));
   }
 
@@ -405,7 +409,7 @@ public abstract class AbstractWxCpServiceImpl<H, P> implements WxCpService, Requ
 
       if (error.getErrorCode() != 0) {
         this.log.error("\n【请求地址】: {}\n【请求参数】：{}\n【错误信息】：{}", uriWithAccessToken, data, error);
-        throw new WxErrorException(error);
+        throw new WxErrorException(error, e);
       }
       return null;
     } catch (IOException e) {
@@ -539,5 +543,35 @@ public abstract class AbstractWxCpServiceImpl<H, P> implements WxCpService, Requ
   @Override
   public RequestHttp getRequestHttp() {
     return this;
+  }
+
+  @Override
+  public void setUserService(WxCpUserService userService) {
+    this.userService = userService;
+  }
+
+  @Override
+  public void setDepartmentService(WxCpDepartmentService departmentService) {
+    this.departmentService = departmentService;
+  }
+
+  @Override
+  public void setMediaService(WxCpMediaService mediaService) {
+    this.mediaService = mediaService;
+  }
+
+  @Override
+  public void setMenuService(WxCpMenuService menuService) {
+    this.menuService = menuService;
+  }
+
+  @Override
+  public void setOauth2Service(WxCpOAuth2Service oauth2Service) {
+    this.oauth2Service = oauth2Service;
+  }
+
+  @Override
+  public void setTagService(WxCpTagService tagService) {
+    this.tagService = tagService;
   }
 }

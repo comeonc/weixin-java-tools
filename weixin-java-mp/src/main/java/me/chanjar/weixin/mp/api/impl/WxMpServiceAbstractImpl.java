@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
-public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, RequestHttp<H, P> {
+public abstract class WxMpServiceAbstractImpl<H, P> implements WxMpService, RequestHttp<H, P> {
 
   private static final JsonParser JSON_PARSER = new JsonParser();
 
@@ -42,6 +42,8 @@ public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, Requ
   private WxMpTemplateMsgService templateMsgService = new WxMpTemplateMsgServiceImpl(this);
   private WxMpDeviceService deviceService = new WxMpDeviceServiceImpl(this);
   private WxMpShakeService shakeService = new WxMpShakeServiceImpl(this);
+  private WxMpMemberCardService memberCardService = new WxMpMemberCardServiceImpl(this);
+  private WxMpMassMessageService massMessageService = new WxMpMassMessageServiceImpl(this);
 
   private int retrySleepMillis = 1000;
   private int maxRetryTimes = 5;
@@ -65,10 +67,9 @@ public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, Requ
 
   @Override
   public String getJsapiTicket(boolean forceRefresh) throws WxErrorException {
-    Lock lock = this.getWxMpConfigStorage().getJsapiTicketLock();
+    Lock lock = this.getWxMpConfigStorage().getAccessTokenLock();
     try {
       lock.lock();
-
       if (forceRefresh) {
         this.getWxMpConfigStorage().expireJsapiTicket();
       }
@@ -106,36 +107,6 @@ public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, Requ
   @Override
   public String getAccessToken() throws WxErrorException {
     return getAccessToken(false);
-  }
-
-  @Override
-  public WxMpMassUploadResult massNewsUpload(WxMpMassNews news) throws WxErrorException {
-    String responseContent = this.post(WxMpService.MEDIA_UPLOAD_NEWS_URL, news.toJson());
-    return WxMpMassUploadResult.fromJson(responseContent);
-  }
-
-  @Override
-  public WxMpMassUploadResult massVideoUpload(WxMpMassVideo video) throws WxErrorException {
-    String responseContent = this.post(WxMpService.MEDIA_UPLOAD_VIDEO_URL, video.toJson());
-    return WxMpMassUploadResult.fromJson(responseContent);
-  }
-
-  @Override
-  public WxMpMassSendResult massGroupMessageSend(WxMpMassTagMessage message) throws WxErrorException {
-    String responseContent = this.post(WxMpService.MESSAGE_MASS_SENDALL_URL, message.toJson());
-    return WxMpMassSendResult.fromJson(responseContent);
-  }
-
-  @Override
-  public WxMpMassSendResult massOpenIdsMessageSend(WxMpMassOpenIdsMessage message) throws WxErrorException {
-    String responseContent = this.post(WxMpService.MESSAGE_MASS_SEND_URL, message.toJson());
-    return WxMpMassSendResult.fromJson(responseContent);
-  }
-
-  @Override
-  public WxMpMassSendResult massMessagePreview(WxMpMassPreviewMessage wxMpMassPreviewMessage) throws Exception {
-    String responseContent = this.post(WxMpService.MESSAGE_MASS_PREVIEW_URL, wxMpMassPreviewMessage.toJson());
-    return WxMpMassSendResult.fromJson(responseContent);
   }
 
   @Override
@@ -232,6 +203,11 @@ public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, Requ
   }
 
   @Override
+  public WxMpCurrentAutoReplyInfo getCurrentAutoReplyInfo() throws WxErrorException {
+    return WxMpCurrentAutoReplyInfo.fromJson(this.get(GET_CURRENT_AUTOREPLY_INFO_URL, null));
+  }
+
+  @Override
   public String get(String url, String queryParam) throws WxErrorException {
     return execute(SimpleGetRequestExecutor.create(this), url, queryParam);
   }
@@ -306,7 +282,7 @@ public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, Requ
 
       if (error.getErrorCode() != 0) {
         this.log.error("\n【请求地址】: {}\n【请求参数】：{}\n【错误信息】：{}", uriWithAccessToken, data, error);
-        throw new WxErrorException(error);
+        throw new WxErrorException(error, e);
       }
       return null;
     } catch (IOException e) {
@@ -397,12 +373,97 @@ public abstract class AbstractWxMpServiceImpl<H, P> implements WxMpService, Requ
   }
 
   @Override
-  public WxMpShakeService getShakeService(){
+  public WxMpShakeService getShakeService() {
     return this.shakeService;
+  }
+
+  @Override
+  public WxMpMemberCardService getMemberCardService() {
+    return this.memberCardService;
   }
 
   @Override
   public RequestHttp getRequestHttp() {
     return this;
+  }
+
+  @Override
+  public WxMpMassMessageService getMassMessageService() {
+    return this.massMessageService;
+  }
+
+  @Override
+  public void setKefuService(WxMpKefuService kefuService) {
+    this.kefuService = kefuService;
+  }
+
+  @Override
+  public void setMaterialService(WxMpMaterialService materialService) {
+    this.materialService = materialService;
+  }
+
+  @Override
+  public void setMenuService(WxMpMenuService menuService) {
+    this.menuService = menuService;
+  }
+
+  @Override
+  public void setUserService(WxMpUserService userService) {
+    this.userService = userService;
+  }
+
+  @Override
+  public void setTagService(WxMpUserTagService tagService) {
+    this.tagService = tagService;
+  }
+
+  @Override
+  public void setQrCodeService(WxMpQrcodeService qrCodeService) {
+    this.qrCodeService = qrCodeService;
+  }
+
+  @Override
+  public void setCardService(WxMpCardService cardService) {
+    this.cardService = cardService;
+  }
+
+  @Override
+  public void setStoreService(WxMpStoreService storeService) {
+    this.storeService = storeService;
+  }
+
+  @Override
+  public void setDataCubeService(WxMpDataCubeService dataCubeService) {
+    this.dataCubeService = dataCubeService;
+  }
+
+  @Override
+  public void setBlackListService(WxMpUserBlacklistService blackListService) {
+    this.blackListService = blackListService;
+  }
+
+  @Override
+  public void setTemplateMsgService(WxMpTemplateMsgService templateMsgService) {
+    this.templateMsgService = templateMsgService;
+  }
+
+  @Override
+  public void setDeviceService(WxMpDeviceService deviceService) {
+    this.deviceService = deviceService;
+  }
+
+  @Override
+  public void setShakeService(WxMpShakeService shakeService) {
+    this.shakeService = shakeService;
+  }
+
+  @Override
+  public void setMemberCardService(WxMpMemberCardService memberCardService) {
+    this.memberCardService = memberCardService;
+  }
+
+  @Override
+  public void setMassMessageService(WxMpMassMessageService massMessageService) {
+    this.massMessageService = massMessageService;
   }
 }
