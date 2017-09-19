@@ -4,6 +4,10 @@ import com.github.binarywang.utils.qrcode.QrcodeUtils;
 import com.github.binarywang.wxpay.bean.coupon.*;
 import com.github.binarywang.wxpay.bean.request.*;
 import com.github.binarywang.wxpay.bean.result.*;
+import com.github.binarywang.wxpay.constant.WxPayConstants;
+import com.github.binarywang.wxpay.constant.WxPayConstants.BillType;
+import com.github.binarywang.wxpay.constant.WxPayConstants.SignType;
+import com.github.binarywang.wxpay.constant.WxPayConstants.TradeType;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.testbase.ApiTestModule;
@@ -15,6 +19,8 @@ import org.testng.annotations.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 import static org.testng.Assert.*;
@@ -33,25 +39,74 @@ public class WxPayServiceAbstractImplTest {
   @Inject
   private WxPayService payService;
 
+  /**
+   * Test method for {@link WxPayService#unifiedOrder(WxPayUnifiedOrderRequest)}.
+   */
+  @Test
+  public void testUnifiedOrder() throws WxPayException {
+    WxPayUnifiedOrderResult result = this.payService
+      .unifiedOrder(WxPayUnifiedOrderRequest.newBuilder()
+        .body("我去")
+        .totalFee(1)
+        .spbillCreateIp("11.1.11.1")
+        .notifyURL("111111")
+        .tradeType(TradeType.JSAPI)
+        .openid(((XmlWxPayConfig) this.payService.getConfig()).getOpenid())
+        .outTradeNo("1111112")
+        .build());
+    this.logger.info(result.toString());
+    this.logger.warn(this.payService.getWxApiData().toString());
+  }
+
   @Test
   public void testGetPayInfo() throws Exception {
     Map<String, String> payInfo = this.payService.getPayInfo(WxPayUnifiedOrderRequest.newBuilder()
       .body("我去")
       .totalFee(1)
-      .spbillCreateIp("111111")
+      .spbillCreateIp("1.11.1.11")
       .notifyURL("111111")
-      .tradeType("JSAPI")
-      .outTradeNo("111111")
+      .tradeType(TradeType.JSAPI)
+      .outTradeNo("1111113")
       .openid(((XmlWxPayConfig) this.payService.getConfig()).getOpenid())
       .build());
     this.logger.info(payInfo.toString());
   }
 
+  /**
+   * Test method for {@link WxPayService#queryOrder(String, String)} .
+   */
   @Test
-  public void testDownloadBill() throws Exception {
-    WxPayBillResult wxPayBillResult = this.payService.downloadBill("20170101", "ALL", "GZIP", "1111111");
-    //前一天没有账单记录返回null
-    assertNotNull(wxPayBillResult);
+  public void testQueryOrder() throws WxPayException {
+    this.logger.info(this.payService.queryOrder("11212121", null).toString());
+    this.logger.info(this.payService.queryOrder(null, "11111").toString());
+  }
+
+  /**
+   * Test method for {@link WxPayService#closeOrder(String)} .
+   */
+  @Test
+  public void testCloseOrder() throws WxPayException {
+    this.logger.info(this.payService.closeOrder("11212121").toString());
+  }
+
+  @DataProvider
+  public Object[][] billingData() {
+    return new Object[][]{
+//      {"20170831", BillType.ALL, null, "deviceInfo"},
+      {"20170831", BillType.SUCCESS, null, "deviceInfo"}
+    };
+  }
+
+  @Test(dataProvider = "billingData")
+  public void testDownloadBill(String billDate, String billType,
+                               String tarType, String deviceInfo) throws Exception {
+    WxPayBillResult billResult = this.payService.downloadBill(billDate, billType, tarType, deviceInfo);
+    assertNotNull(billResult);
+    this.logger.info(billResult.toString());
+  }
+
+  @Test
+  public void testDownloadBill_withNoParams() throws Exception {
     //必填字段为空时，抛出异常
     this.payService.downloadBill("", "", "", null);
   }
@@ -60,7 +115,7 @@ public class WxPayServiceAbstractImplTest {
   public void testReport() throws Exception {
     WxPayReportRequest request = new WxPayReportRequest();
     request.setInterfaceUrl("hahahah");
-    request.setSignType("HMAC-SHA256");//貌似接口未校验此字段
+    request.setSignType(SignType.HMAC_SHA256);//貌似接口未校验此字段
     request.setExecuteTime(1000);
     request.setReturnCode("aaa");
     request.setResultCode("aaa");
@@ -107,6 +162,11 @@ public class WxPayServiceAbstractImplTest {
     this.logger.info(result.toString());
   }
 
+  @Test
+  public void testParseRefundNotifyResult() throws Exception {
+    // 请参考com.github.binarywang.wxpay.bean.notify.WxPayRefundNotifyResultTest里的单元测试
+  }
+
   /**
    * Test method for {@link WxPayService#sendRedpack(WxPaySendRedpackRequest)} .
    */
@@ -131,46 +191,19 @@ public class WxPayServiceAbstractImplTest {
   }
 
   /**
-   * Test method for {@link WxPayService#unifiedOrder(WxPayUnifiedOrderRequest)}.
-   */
-  @Test
-  public void testUnifiedOrder() throws WxPayException {
-    WxPayUnifiedOrderResult result = this.payService
-      .unifiedOrder(WxPayUnifiedOrderRequest.newBuilder()
-        .body("我去")
-        .totalFee(1)
-        .spbillCreateIp("111111")
-        .notifyURL("111111")
-        .tradeType("JSAPI")
-        .openid(((XmlWxPayConfig) this.payService.getConfig()).getOpenid())
-        .outTradeNo("111111")
-        .build());
-    this.logger.info(result.toString());
-  }
-
-  /**
-   * Test method for {@link WxPayService#queryOrder(String, String)} .
-   */
-  @Test
-  public void testQueryOrder() throws WxPayException {
-    this.logger.info(this.payService.queryOrder("11212121", null).toString());
-    this.logger.info(this.payService.queryOrder(null, "11111").toString());
-  }
-
-  /**
-   * Test method for {@link WxPayService#closeOrder(String)} .
-   */
-  @Test
-  public void testCloseOrder() throws WxPayException {
-    this.logger.info(this.payService.closeOrder("11212121").toString());
-  }
-
-  /**
    * Test method for {@link WxPayService#entPay(WxEntPayRequest)}.
    */
   @Test
   public void testEntPay() throws WxPayException {
-    WxEntPayRequest request = new WxEntPayRequest();
+    WxEntPayRequest request = WxEntPayRequest.newBuilder()
+      .partnerTradeNo("Eb6Aep7uVTdbkJqrP4")
+      .openid("ojOQA0y9o-Eb6Aep7uVTdbkJqrP4")
+      .amount(1)
+      .spbillCreateIp("10.10.10.10")
+      .checkName(WxPayConstants.CheckNameOption.NO_CHECK)
+      .description("描述信息")
+      .build();
+
     this.logger.info(this.payService.entPay(request).toString());
   }
 
@@ -294,10 +327,24 @@ public class WxPayServiceAbstractImplTest {
   @Test
   public void testQueryCouponInfo() throws Exception {
     WxPayCouponInfoQueryResult result = this.payService.queryCouponInfo(WxPayCouponInfoQueryRequest.newBuilder()
-      .openid("onqOjjrXT-776SpHnfexGm1_P7iE")
+      .openid("ojOQA0y9o-Eb6Aep7uVTdbkJqrP4")
       .couponId("11")
       .stockId("1121")
       .build());
     this.logger.info(result.toString());
   }
+
+  /**
+   * 目前调用接口总报“系统繁忙，清稍后再试”，怀疑根本没法使用
+   */
+  @Test
+  public void testQueryComment() throws Exception {
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.DAY_OF_MONTH, -2);
+    Date beginDate = calendar.getTime();
+    calendar.add(Calendar.MONTH, -1);
+    Date endDate = calendar.getTime();
+    this.payService.queryComment(beginDate, endDate, 0, null);
+  }
+
 }
