@@ -2,6 +2,7 @@ package me.chanjar.weixin.mp.bean.datacube;
 
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
+import lombok.Data;
 import me.chanjar.weixin.common.util.ToStringUtils;
 
 import java.io.Serializable;
@@ -12,8 +13,9 @@ import java.io.Serializable;
  *  Created by Binary Wang on 2016/8/25.
  * </pre>
  *
- * @author <a href="https://github.com/binarywang">binarywang(Binary Wang)</a>
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
 public abstract class WxDataCubeBaseResult implements Serializable {
   private static final long serialVersionUID = 8780389911053297600L;
   protected static final JsonParser JSON_PARSER = new JsonParser();
@@ -28,14 +30,6 @@ public abstract class WxDataCubeBaseResult implements Serializable {
   @Override
   public String toString() {
     return ToStringUtils.toSimpleString(this);
-  }
-
-  public String getRefDate() {
-    return this.refDate;
-  }
-
-  public void setRefDate(String refDate) {
-    this.refDate = refDate;
   }
 
 }

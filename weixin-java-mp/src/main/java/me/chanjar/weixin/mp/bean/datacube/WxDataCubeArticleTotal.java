@@ -1,18 +1,20 @@
 package me.chanjar.weixin.mp.bean.datacube;
 
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import lombok.Data;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 
 import java.util.List;
 
 /**
  * 图文分析数据接口返回结果对象
+ * <p>
+ * Created by Binary Wang on 2016/8/24.
  *
- * @author <a href="https://github.com/binarywang">binarywang(Binary Wang)</a>
- *         Created by Binary Wang on 2016/8/24.
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
 public class WxDataCubeArticleTotal extends WxDataCubeBaseResult {
   private static final long serialVersionUID = -7634365687303052699L;
 
@@ -44,27 +46,4 @@ public class WxDataCubeArticleTotal extends WxDataCubeBaseResult {
       }.getType());
   }
 
-  public String getMsgId() {
-    return this.msgId;
-  }
-
-  public void setMsgId(String msgId) {
-    this.msgId = msgId;
-  }
-
-  public String getTitle() {
-    return this.title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public List<WxDataCubeArticleTotalDetail> getDetails() {
-    return this.details;
-  }
-
-  public void setDetails(List<WxDataCubeArticleTotalDetail> details) {
-    this.details = details;
-  }
 }
