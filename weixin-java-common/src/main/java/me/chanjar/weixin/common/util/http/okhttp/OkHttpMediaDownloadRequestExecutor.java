@@ -1,7 +1,7 @@
 package me.chanjar.weixin.common.util.http.okhttp;
 
-import me.chanjar.weixin.common.bean.result.WxError;
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.BaseMediaDownloadRequestExecutor;
 import me.chanjar.weixin.common.util.http.HttpResponseProxy;
 import me.chanjar.weixin.common.util.http.RequestHttp;
@@ -56,11 +56,14 @@ public class OkHttpMediaDownloadRequestExecutor extends BaseMediaDownloadRequest
       return null;
     }
 
-    File file = File.createTempFile(FilenameUtils.getBaseName(fileName), FilenameUtils.getExtension(fileName),
-      super.tmpDirFile);
+    File file = File.createTempFile(
+      FilenameUtils.getBaseName(fileName), "." + FilenameUtils.getExtension(fileName), super.tmpDirFile
+    );
+
     try (BufferedSink sink = Okio.buffer(Okio.sink(file))) {
       sink.writeAll(response.body().source());
     }
+
     file.deleteOnExit();
     return file;
   }

@@ -1,6 +1,6 @@
 package me.chanjar.weixin.open.api.impl;
 
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpConfigStorage;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
@@ -9,7 +9,7 @@ import me.chanjar.weixin.open.api.WxOpenComponentService;
 /**
  * @author <a href="https://github.com/007gzs">007</a>
  */
-public class WxOpenMpServiceImpl extends WxMpServiceImpl {
+/* package */ class WxOpenMpServiceImpl extends WxMpServiceImpl {
   private WxOpenComponentService wxOpenComponentService;
   private WxMpConfigStorage wxMpConfigStorage;
   private String appId;
@@ -18,6 +18,7 @@ public class WxOpenMpServiceImpl extends WxMpServiceImpl {
     this.wxOpenComponentService = wxOpenComponentService;
     this.appId = appId;
     this.wxMpConfigStorage = wxMpConfigStorage;
+    initHttp();
   }
 
   @Override
@@ -34,11 +35,6 @@ public class WxOpenMpServiceImpl extends WxMpServiceImpl {
   public WxMpOAuth2AccessToken oauth2getAccessToken(String code) throws WxErrorException {
     return wxOpenComponentService.oauth2getAccessToken(appId, code);
   }
-
-//  @Override
-//  public boolean checkSignature(String timestamp, String nonce, String signature) {
-//    return wxOpenComponentService.checkSignature(appId, timestamp, nonce, signature);
-//  }
 
   @Override
   public WxMpOAuth2AccessToken oauth2refreshAccessToken(String refreshToken) throws WxErrorException {

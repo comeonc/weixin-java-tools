@@ -1,5 +1,14 @@
 package cn.binarywang.wx.miniapp.bean;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import cn.binarywang.wx.miniapp.config.WxMaConfig;
 import cn.binarywang.wx.miniapp.util.crypt.WxMaCryptUtils;
 import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
@@ -8,14 +17,7 @@ import com.google.gson.annotations.SerializedName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import lombok.Data;
-import me.chanjar.weixin.common.util.ToStringUtils;
 import me.chanjar.weixin.common.util.xml.XStreamCDataConverter;
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
@@ -42,15 +44,18 @@ public class WxMaMessage implements Serializable {
 
   @SerializedName("CreateTime")
   @XStreamAlias("CreateTime")
-  @XStreamConverter(value = XStreamCDataConverter.class)
   private Integer createTime;
+
+  @SerializedName("MsgType")
+  @XStreamAlias("MsgType")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String msgType;
 
   @SerializedName("MsgDataFormat")
   @XStreamAlias("MsgDataFormat")
   @XStreamConverter(value = XStreamCDataConverter.class)
-  private String msgType;
+  private String msgDataFormat;
 
-  // 文本消息
   @SerializedName("Content")
   @XStreamAlias("Content")
   @XStreamConverter(value = XStreamCDataConverter.class)
@@ -58,10 +63,8 @@ public class WxMaMessage implements Serializable {
 
   @SerializedName("MsgId")
   @XStreamAlias("MsgId")
-  @XStreamConverter(value = XStreamCDataConverter.class)
   private Long msgId;
 
-  // 图片消息
   @SerializedName("PicUrl")
   @XStreamAlias("PicUrl")
   @XStreamConverter(value = XStreamCDataConverter.class)
@@ -72,11 +75,35 @@ public class WxMaMessage implements Serializable {
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String mediaId;
 
-  // 事件消息
   @SerializedName("Event")
   @XStreamAlias("Event")
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String event;
+
+  @SerializedName("Title")
+  @XStreamAlias("Title")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String title;
+
+  @SerializedName("AppId")
+  @XStreamAlias("AppId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String appId;
+
+  @SerializedName("PagePath")
+  @XStreamAlias("PagePath")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String pagePath;
+
+  @SerializedName("ThumbUrl")
+  @XStreamAlias("ThumbUrl")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String thumbUrl;
+
+  @SerializedName("ThumbMediaId")
+  @XStreamAlias("ThumbMediaId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String thumbMediaId;
 
   @SerializedName("SessionFrom")
   @XStreamAlias("SessionFrom")
@@ -92,7 +119,7 @@ public class WxMaMessage implements Serializable {
   }
 
   /**
-   * 从加密字符串转换
+   * 从加密字符串转换.
    *
    * @param encryptedXml 密文
    * @param wxMaConfig   配置存储器对象
@@ -141,7 +168,7 @@ public class WxMaMessage implements Serializable {
 
   @Override
   public String toString() {
-    return ToStringUtils.toSimpleString(this);
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
   }
 
   public String toJson() {

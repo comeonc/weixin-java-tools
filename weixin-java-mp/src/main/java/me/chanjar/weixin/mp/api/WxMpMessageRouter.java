@@ -77,6 +77,29 @@ public class WxMpMessageRouter {
 
   /**
    * <pre>
+   * 使用自定义的 {@link ExecutorService}
+   * </pre>
+   */
+  public WxMpMessageRouter(WxMpService wxMpService, ExecutorService executorService) {
+    this.wxMpService = wxMpService;
+    this.executorService = executorService;
+    this.messageDuplicateChecker = new WxMessageInMemoryDuplicateChecker();
+    this.sessionManager = new StandardSessionManager();
+    this.exceptionHandler = new LogExceptionHandler();
+  }
+
+  /**
+   * <pre>
+   * 如果使用默认的 {@link ExecutorService}，则系统退出前，应该调用该方法。
+   * </pre>
+   */
+  public void shutDownExecutorService() {
+    this.executorService.shutdown();
+  }
+
+
+  /**
+   * <pre>
    * 设置自定义的 {@link ExecutorService}
    * 如果不调用该方法，默认使用 Executors.newFixedThreadPool(100)
    * </pre>
@@ -130,6 +153,16 @@ public class WxMpMessageRouter {
    * 处理微信消息
    */
   public WxMpXmlOutMessage route(final WxMpXmlMessage wxMessage, final Map<String, Object> context) {
+    return route(wxMessage, context, null);
+  }
+  /**
+   * 处理微信消息
+   */
+  public WxMpXmlOutMessage route(final WxMpXmlMessage wxMessage, final Map<String, Object> context, WxMpService wxMpService) {
+    if(wxMpService == null){
+      wxMpService = this.wxMpService;
+    }
+    final WxMpService mpService = wxMpService;
     if (isMsgDuplicated(wxMessage)) {
       // 如果是重复消息，那么就不做处理
       return null;
@@ -159,12 +192,12 @@ public class WxMpMessageRouter {
           this.executorService.submit(new Runnable() {
             @Override
             public void run() {
-              rule.service(wxMessage, context, WxMpMessageRouter.this.wxMpService, WxMpMessageRouter.this.sessionManager, WxMpMessageRouter.this.exceptionHandler);
+              rule.service(wxMessage, context, mpService, WxMpMessageRouter.this.sessionManager, WxMpMessageRouter.this.exceptionHandler);
             }
           })
         );
       } else {
-        res = rule.service(wxMessage, context, this.wxMpService, this.sessionManager, this.exceptionHandler);
+        res = rule.service(wxMessage, context, mpService, this.sessionManager, this.exceptionHandler);
         // 在同步操作结束，session访问结束
         this.log.debug("End session access: async=false, sessionId={}", wxMessage.getFromUser());
         sessionEndAccess(wxMessage);

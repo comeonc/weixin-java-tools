@@ -1,15 +1,8 @@
-/*
- * KINGSTAR MEDIA SOLUTIONS Co.,LTD. Copyright c 2005-2013. All rights reserved.
- *
- * This source code is the property of KINGSTAR MEDIA SOLUTIONS LTD. It is intended
- * only for the use of KINGSTAR MEDIA application development. Reengineering, reproduction
- * arose from modification of the original source, or other redistribution of this source
- * is not permitted without written permission of the KINGSTAR MEDIA SOLUTIONS LTD.
- */
 package me.chanjar.weixin.mp.util.json;
 
 import com.google.gson.*;
 import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.api.WxConsts.KefuMsgType;
 import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,6 +78,15 @@ public class WxMpKefuMessageGsonAdapter implements JsonSerializer<WxMpKefuMessag
       JsonObject wxcard = new JsonObject();
       wxcard.addProperty("card_id", message.getCardId());
       messageJson.add("wxcard", wxcard);
+    }
+
+    if (KefuMsgType.MINIPROGRAMPAGE.equals(message.getMsgType())) {
+      JsonObject miniProgramPage = new JsonObject();
+      miniProgramPage.addProperty("title", message.getTitle());
+      miniProgramPage.addProperty("appid", message.getMiniProgramAppId());
+      miniProgramPage.addProperty("pagepath", message.getMiniProgramPagePath());
+      miniProgramPage.addProperty("thumb_media_id", message.getThumbMediaId());
+      messageJson.add("miniprogrampage", miniProgramPage);
     }
 
     if (StringUtils.isNotBlank(message.getKfAccount())) {

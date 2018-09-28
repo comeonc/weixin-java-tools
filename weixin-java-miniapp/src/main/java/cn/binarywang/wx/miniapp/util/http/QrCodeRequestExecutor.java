@@ -1,8 +1,8 @@
 package cn.binarywang.wx.miniapp.util.http;
 
 import cn.binarywang.wx.miniapp.bean.AbstractWxMaQrcodeWrapper;
-import me.chanjar.weixin.common.bean.result.WxError;
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.fs.FileUtils;
 import me.chanjar.weixin.common.util.http.RequestExecutor;
 import me.chanjar.weixin.common.util.http.RequestHttp;
@@ -37,17 +37,17 @@ public class QrCodeRequestExecutor implements RequestExecutor<File, AbstractWxMa
     HttpPost httpPost = new HttpPost(uri);
     if (requestHttp.getRequestHttpProxy() != null) {
       httpPost.setConfig(
-          RequestConfig.custom().setProxy(requestHttp.getRequestHttpProxy()).build()
+        RequestConfig.custom().setProxy(requestHttp.getRequestHttpProxy()).build()
       );
     }
-    httpPost.setEntity(new StringEntity(ticket.toString()));
+    httpPost.setEntity(new StringEntity(ticket.toJson()));
 
     try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpPost);
          InputStream inputStream = InputStreamResponseHandler.INSTANCE.handleResponse(response);) {
       Header[] contentTypeHeader = response.getHeaders("Content-Type");
       if (contentTypeHeader != null && contentTypeHeader.length > 0
-          && ContentType.APPLICATION_JSON.getMimeType()
-          .equals(ContentType.parse(contentTypeHeader[0].getValue()).getMimeType())) {
+        && ContentType.APPLICATION_JSON.getMimeType()
+        .equals(ContentType.parse(contentTypeHeader[0].getValue()).getMimeType())) {
         String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
         throw new WxErrorException(WxError.fromJson(responseContent));
       }
