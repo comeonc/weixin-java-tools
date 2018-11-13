@@ -3,19 +3,20 @@ package me.chanjar.weixin.mp.bean.message;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.util.XmlUtils;
 import me.chanjar.weixin.common.util.xml.XStreamCDataConverter;
 import me.chanjar.weixin.mp.api.WxMpConfigStorage;
 import me.chanjar.weixin.mp.util.crypto.WxMpCryptUtil;
+import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 import me.chanjar.weixin.mp.util.xml.XStreamTransformer;
 
 /**
@@ -33,6 +34,11 @@ import me.chanjar.weixin.mp.util.xml.XStreamTransformer;
 @XStreamAlias("xml")
 public class WxMpXmlMessage implements Serializable {
   private static final long serialVersionUID = -3586245291677274914L;
+
+  /**
+   * 使用dom4j解析的存放所有xml属性和值的map.
+   */
+  private Map<String, Object> allFieldsMap;
 
   ///////////////////////
   // 以下都是微信推送过来的消息的xml的element所对应的属性
@@ -128,6 +134,10 @@ public class WxMpXmlMessage implements Serializable {
   @XStreamAlias("Recognition")
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String recognition;
+
+  @XStreamAlias("UnionId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String unionId;
 
   ///////////////////////////////////////
   // 群发消息返回的结果
@@ -559,7 +569,9 @@ public class WxMpXmlMessage implements Serializable {
   public static WxMpXmlMessage fromXml(String xml) {
     //修改微信变态的消息内容格式，方便解析
     xml = xml.replace("</PicList><PicList>", "");
-    return XStreamTransformer.fromXml(WxMpXmlMessage.class, xml);
+    final WxMpXmlMessage xmlMessage = XStreamTransformer.fromXml(WxMpXmlMessage.class, xml);
+    xmlMessage.setAllFieldsMap(XmlUtils.xml2Map(xml));
+    return xmlMessage;
   }
 
   public static WxMpXmlMessage fromXml(InputStream is) {
@@ -625,7 +637,7 @@ public class WxMpXmlMessage implements Serializable {
 
   @Override
   public String toString() {
-    return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
+    return WxMpGsonBuilder.create().toJson(this);
   }
 
 }

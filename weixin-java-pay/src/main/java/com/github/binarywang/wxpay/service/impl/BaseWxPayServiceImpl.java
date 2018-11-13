@@ -90,14 +90,17 @@ import static com.github.binarywang.wxpay.constant.WxPayConstants.TarType;
  */
 public abstract class BaseWxPayServiceImpl implements WxPayService {
   private static final String PAY_BASE_URL = "https://api.mch.weixin.qq.com";
+  private static final String TOTAL_FUND_COUNT = "资金流水总笔数";
+  private static final String TOTAL_DEAL_COUNT = "总交易单数";
+
   /**
    * The Log.
    */
-  protected final Logger log = LoggerFactory.getLogger(this.getClass());
+  final Logger log = LoggerFactory.getLogger(this.getClass());
   /**
    * The constant wxApiData.
    */
-  protected static ThreadLocal<WxPayApiData> wxApiData = new ThreadLocal<>();
+  static ThreadLocal<WxPayApiData> wxApiData = new ThreadLocal<>();
 
   private EntPayService entPayService = new EntPayServiceImpl(this);
 
@@ -141,8 +144,7 @@ public abstract class BaseWxPayServiceImpl implements WxPayService {
 
     String url = this.getPayBaseUrl() + "/secapi/pay/refund";
     String responseContent = this.post(url, request.toXML(), true);
-    WxPayRefundResult result = BaseWxPayResult.fromXML(responseContent, WxPayRefundResult.class);
-    result.composeRefundCoupons();
+    WxPayRefundResult result = WxPayRefundResult.fromXML(responseContent);
     result.checkResult(this, request.getSignType(), true);
     return result;
   }
@@ -493,7 +495,19 @@ public abstract class BaseWxPayServiceImpl implements WxPayService {
   }
 
   @Override
-  public WxPayBillResult downloadBill(String billDate, String billType, String tarType, String deviceInfo) throws WxPayException {
+  public String downloadRawBill(String billDate, String billType, String tarType, String deviceInfo)
+    throws WxPayException {
+    return this.downloadRawBill(this.buildDownloadBillRequest(billDate, billType, tarType, deviceInfo));
+  }
+
+  @Override
+  public WxPayBillResult downloadBill(String billDate, String billType, String tarType, String deviceInfo)
+    throws WxPayException {
+    return this.downloadBill(this.buildDownloadBillRequest(billDate, billType, tarType, deviceInfo));
+  }
+
+  private WxPayDownloadBillRequest buildDownloadBillRequest(String billDate, String billType, String tarType,
+                                                            String deviceInfo) throws WxPayException {
     if (!BillType.ALL.equals(billType)) {
       throw new WxPayException("目前仅支持ALL类型的对账单下载");
     }
@@ -503,12 +517,22 @@ public abstract class BaseWxPayServiceImpl implements WxPayService {
     request.setBillDate(billDate);
     request.setTarType(tarType);
     request.setDeviceInfo(deviceInfo);
-
-    return this.downloadBill(request);
+    return request;
   }
 
   @Override
   public WxPayBillResult downloadBill(WxPayDownloadBillRequest request) throws WxPayException {
+    String responseContent = this.downloadRawBill(request);
+
+    if (StringUtils.isEmpty(responseContent)) {
+      return null;
+    }
+
+    return this.handleBill(request.getBillType(), responseContent);
+  }
+
+  @Override
+  public String downloadRawBill(WxPayDownloadBillRequest request) throws WxPayException {
     request.checkAndSign(this.getConfig());
 
     String url = this.getPayBaseUrl() + "/pay/downloadbill";
@@ -522,8 +546,7 @@ public abstract class BaseWxPayServiceImpl implements WxPayService {
         throw WxPayException.from(BaseWxPayResult.fromXML(responseContent, WxPayCommonResult.class));
       }
     }
-
-    return this.handleBill(request.getBillType(), responseContent);
+    return responseContent;
   }
 
   private WxPayBillResult handleBill(String billType, String responseContent) {
@@ -563,9 +586,9 @@ public abstract class BaseWxPayServiceImpl implements WxPayService {
 
     String listStr = "";
     String objStr = "";
-    if (responseContent.contains("总交易单数")) {
-      listStr = responseContent.substring(0, responseContent.indexOf("总交易单数"));
-      objStr = responseContent.substring(responseContent.indexOf("总交易单数"));
+    if (responseContent.contains(TOTAL_DEAL_COUNT)) {
+      listStr = responseContent.substring(0, responseContent.indexOf(TOTAL_DEAL_COUNT));
+      objStr = responseContent.substring(responseContent.indexOf(TOTAL_DEAL_COUNT));
     }
 
     /*
@@ -695,9 +718,9 @@ public abstract class BaseWxPayServiceImpl implements WxPayService {
     String listStr = "";
     String objStr = "";
 
-    if (StringUtils.isNotBlank(responseContent) && responseContent.contains("资金流水总笔数")) {
-      listStr = responseContent.substring(0, responseContent.indexOf("资金流水总笔数"));
-      objStr = responseContent.substring(responseContent.indexOf("资金流水总笔数"));
+    if (StringUtils.isNotBlank(responseContent) && responseContent.contains(TOTAL_FUND_COUNT)) {
+      listStr = responseContent.substring(0, responseContent.indexOf(TOTAL_FUND_COUNT));
+      objStr = responseContent.substring(responseContent.indexOf(TOTAL_FUND_COUNT));
     }
     /*
      * 记账时间:2018-02-01 04:21:23 微信支付业务单号:50000305742018020103387128253 资金流水单号:1900009231201802015884652186 业务名称:退款
