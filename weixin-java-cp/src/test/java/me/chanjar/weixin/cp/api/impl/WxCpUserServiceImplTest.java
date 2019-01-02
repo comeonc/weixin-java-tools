@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
 public class WxCpUserServiceImplTest {
   @Inject
   private WxCpService wxCpService;
-  private String userId = "someone" + System.currentTimeMillis();
+  private String userId = "FuZhengYi";
 
   @Test
   public void testAuthenticate() throws Exception {
@@ -66,7 +66,7 @@ public class WxCpUserServiceImplTest {
     this.wxCpService.getUserService().delete(userId);
   }
 
-  @Test(dependsOnMethods = "testUpdate")
+  @Test
   public void testGetById() throws Exception {
     WxCpUser user = this.wxCpService.getUserService().getById(userId);
     assertNotNull(user);
