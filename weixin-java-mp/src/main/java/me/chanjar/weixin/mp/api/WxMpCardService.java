@@ -2,9 +2,7 @@ package me.chanjar.weixin.mp.api;
 
 import me.chanjar.weixin.common.bean.WxCardApiSignature;
 import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.bean.card.WxMpCardLandingPageCreateRequest;
-import me.chanjar.weixin.mp.bean.card.WxMpCardLandingPageCreateResult;
-import me.chanjar.weixin.mp.bean.card.WxMpCardQrcodeCreateResult;
+import me.chanjar.weixin.mp.bean.card.*;
 import me.chanjar.weixin.mp.bean.result.WxMpCardResult;
 
 /**
@@ -14,6 +12,7 @@ import me.chanjar.weixin.mp.bean.result.WxMpCardResult;
  * @author yuanqixun 2018-08-29
  */
 public interface WxMpCardService {
+  String CARD_CREATE = "https://api.weixin.qq.com/card/create";
   String CARD_GET = "https://api.weixin.qq.com/card/get";
   String CARD_GET_TICKET = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=wx_card";
   String CARD_CODE_DECRYPT = "https://api.weixin.qq.com/card/code/decrypt";
@@ -21,8 +20,8 @@ public interface WxMpCardService {
   String CARD_CODE_CONSUME = "https://api.weixin.qq.com/card/code/consume";
   String CARD_CODE_MARK = "https://api.weixin.qq.com/card/code/mark";
   String CARD_TEST_WHITELIST = "https://api.weixin.qq.com/card/testwhitelist/set";
-  String CARD_QRCODE_CREAET = "https://api.weixin.qq.com/card/qrcode/create";
-  String CARD_LANDING_PAGE_CREAET = "https://api.weixin.qq.com/card/landingpage/create";
+  String CARD_QRCODE_CREATE = "https://api.weixin.qq.com/card/qrcode/create";
+  String CARD_LANDING_PAGE_CREATE = "https://api.weixin.qq.com/card/landingpage/create";
   /**
    * 将用户的卡券设置为失效状态
    */
@@ -141,6 +140,14 @@ public interface WxMpCardService {
    * @return
    */
   String addTestWhiteList(String openid) throws WxErrorException;
+
+  /**
+   *
+   * @param cardCreateMessage
+   * @return
+   * @throws WxErrorException
+   */
+  WxMpCardCreateResult createCard(WxMpCardCreateMessage cardCreateMessage) throws WxErrorException;
 
   /**
    * 创建卡券二维码
